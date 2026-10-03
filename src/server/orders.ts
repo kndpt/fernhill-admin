@@ -15,7 +15,11 @@ export interface OrdersQuery { status?: Order['status']; q?: string; cursor?: st
 
 export async function listOrders(db: Db, query: OrdersQuery): Promise<Order[]> {
   const rows = await db.orders.findMany({
-    where: { status: query.status, customerName: query.q ? { contains: query.q } : undefined },
+    where: {
+      status: query.status,
+      OR: query.q ? [{ customerName: { contains: query.q, mode: 'insensitive' } },
+                     { customerEmail: { contains: query.q, mode: 'insensitive' } }] : undefined,
+    },
     orderBy: { createdAt: 'desc' },
     take: Math.min(query.limit ?? 50, 200),
     cursor: query.cursor ? { id: query.cursor } : undefined,
