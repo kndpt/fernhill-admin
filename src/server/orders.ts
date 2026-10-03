@@ -11,13 +11,15 @@ export const Order = z.object({
 });
 export type Order = z.infer<typeof Order>;
 
-export interface OrdersQuery { status?: Order['status']; q?: string }
+export interface OrdersQuery { status?: Order['status']; q?: string; cursor?: string; limit?: number }
 
 export async function listOrders(db: Db, query: OrdersQuery): Promise<Order[]> {
   const rows = await db.orders.findMany({
     where: { status: query.status, customerName: query.q ? { contains: query.q } : undefined },
     orderBy: { createdAt: 'desc' },
-    take: 50,
+    take: Math.min(query.limit ?? 50, 200),
+    cursor: query.cursor ? { id: query.cursor } : undefined,
+    skip: query.cursor ? 1 : 0,
   });
   return rows.map(row => Order.parse(row));
 }
