@@ -6,7 +6,8 @@ export const Order = z.object({
   customer: z.object({ name: z.string(), email: z.string() }),
   amount: z.number().int(),
   currency: z.string().length(3),
-  status: z.enum(['paid', 'pending', 'refunded', 'failed', 'disputed']),
+  status: z.enum(['paid', 'pending', 'refunded', 'partially_refunded', 'failed', 'disputed']),
+  refundedAmount: z.number().int().default(0),
   createdAt: z.string(),
 });
 export type Order = z.infer<typeof Order>;
